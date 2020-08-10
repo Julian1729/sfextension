@@ -19,9 +19,46 @@ const loadQueryScript = async (tabId, changeInfo, tab) => {
   if (!isPage) return;
   if (changeInfo.status === "complete") {
     // inject script
-    chrome.tabs.executeScript(tabId, { file: "./js/foreground.js" });
+    chrome.tabs.executeScript(tabId, { file: "./js/queryCredentials.js" });
   }
 };
 
 chrome.tabs.onUpdated.addListener(loadQueryScript);
-// chrome.tabs.onActivated.addListener(loadQueryScript);
+
+function createTab(url) {
+  return new Promise(resolve => {
+    chrome.tabs.create({ url }, async tab => {
+      chrome.tabs.onUpdated.addListener(function listener(tabId, info) {
+        if (info.status === "complete" && tabId === tab.id) {
+          chrome.tabs.onUpdated.removeListener(listener);
+          resolve(tab);
+        }
+      });
+    });
+  });
+}
+
+/**
+ * Event Listeners
+ */
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  const { code } = request;
+  switch (code) {
+    case 1:
+      const { wpDomain } = request;
+      // create new tab
+      createTab(`${wpDomain}/wp-admin`)
+        .then(tab => {
+          // inject form automation script
+          chrome.tabs.executeScript(tab.id, {
+            file: "./js/automateFormLogin.js"
+          });
+        })
+        .catch(e => console.error(e));
+      break;
+    case 2:
+      alert(request.message);
+      break;
+    default:
+  }
+});
