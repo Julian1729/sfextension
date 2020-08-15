@@ -15,14 +15,11 @@ if (wpDomain && wpUser && wpPass) {
   chrome.storage.local.set({ wpDomain, wpPass, wpUser });
   // send credentials
   chrome.runtime.sendMessage({
-    code: 1,
+    code: "QUERY_SUCCESSFUL",
     wpDomain,
     wpUser,
     wpPass
   });
 } else {
-  chrome.runTime.sendMessage({
-    code: 2,
-    message: "No credentials found."
-  });
+  alert('No credentials found.');
 }

@@ -1,7 +1,7 @@
 const isSFAccountPage = async tabId => {
   return new Promise(resolve => {
     const sfClassicPattern = new RegExp(
-      /^https?:\/\/[www]?na62.salesforce.com\/\w+/
+      /^https?:\/\/[www]?na62.salesforce.com\/[^home][^_ui]\w+/
     );
 
     chrome.tabs.get(tabId, ({ url }) => {
@@ -44,7 +44,7 @@ function createTab(url) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { code } = request;
   switch (code) {
-    case 1:
+    case "LOGIN":
       const { wpDomain } = request;
       // create new tab
       createTab(`${wpDomain}/wp-admin`)
@@ -55,10 +55,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           });
         })
         .catch(e => console.error(e));
-      break;
-    case 2:
-      alert(request.message);
-      break;
     default:
   }
 });

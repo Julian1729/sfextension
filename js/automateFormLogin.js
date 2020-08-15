@@ -21,8 +21,6 @@ const submitForm = ({ user, pass }) => {
   passwordField.value = pass;
 
   document.getElementById("wp-submit").click();
-
-  // loginForm.submit();
 };
 
 getCredentials()
