@@ -1,5 +1,6 @@
 const isSFAccountPage = async tabId => {
   return new Promise(resolve => {
+    // regex only for classic, not lightning
     const sfClassicPattern = new RegExp(
       /^https?:\/\/[www]?na62.salesforce.com\/[^home][^_ui]\w+/
     );
@@ -14,8 +15,8 @@ const isSFAccountPage = async tabId => {
 };
 
 const loadQueryScript = async (tabId, changeInfo, tab) => {
-  // may be tab object or tab id
   const isPage = await isSFAccountPage(tabId);
+  console.log(isPage);
   if (!isPage) return;
   if (changeInfo.status === "complete") {
     // inject script
@@ -44,7 +45,7 @@ function createTab(url) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { code } = request;
   switch (code) {
-    case "LOGIN":
+    case "WP_LOGIN_LIVE":
       const { wpDomain } = request;
       // create new tab
       createTab(`${wpDomain}/wp-admin`)
@@ -55,6 +56,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           });
         })
         .catch(e => console.error(e));
+      break;
+    case "WP_LOGIN_DEV":
+      const { wpDevUrl } = request;
+      // OPTIMIZE: remove trailing slash if it exists
+      // create new tab and append "/wp-admin" to url
+      createTab(`${wpDevUrl}/wp-admin`)
+        .then(tab => {
+          // inject form automation script
+          chrome.tabs.executeScript(tab.id, {
+            file: "./js/automateFormLogin.js"
+          });
+        })
+        .catch(e => console.error(e));
+      break;
     default:
   }
 });

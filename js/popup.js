@@ -1,8 +1,9 @@
-const primaryLoginBtn = document.getElementById("primary-login-button");
-const devLoginBtn = document.getElementById("primary-login-button");
+const wpLiveBtn = document.getElementById("wp-live-login-button");
+const wpDevBtn = document.getElementById("wp-dev-login-button");
 const accountName = document.getElementById("account-name");
 
 let wpDomain,
+  wpDevUrl,
   wpUser,
   wpPass = null;
 
@@ -10,20 +11,40 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { code } = request;
   switch (request.code) {
     case "QUERY_SUCCESSFUL":
-      console.log("popup got credentials found");
+      // TODO: check if the credentials exist,
+      // and in storage not from message
       wpDomain = request.wpDomain;
+      wpDevUrl = request.wpDevUrl;
       wpUser = request.wpUser;
       wpPass = request.wpPass;
-      primaryLoginBtn.removeAttribute("disabled");
+      if (wpDomain) {
+        wpLiveBtn.removeAttribute("disabled");
+      }
+      if (wpDevUrl) {
+        wpDevBtn.removeAttribute("disabled");
+      }
       break;
     default:
       console.error(`${code} not matched`);
   }
 });
 
-// Primary Login Button Click
-primaryLoginBtn.addEventListener("click", function() {
-  chrome.runtime.sendMessage({ code: "LOGIN", wpDomain, wpUser, wpPass });
+// WP Live Login Button Click
+wpLiveBtn.addEventListener("click", function() {
+  chrome.runtime.sendMessage({
+    code: "WP_LOGIN_LIVE",
+    wpDomain,
+    wpUser,
+    wpPass
+  });
 });
 
-// Secondary Login Button Click
+// WP Dev Login Button Click
+wpDevBtn.addEventListener("click", function() {
+  chrome.runtime.sendMessage({
+    code: "WP_LOGIN_DEV",
+    wpDevUrl,
+    wpUser,
+    wpPass
+  });
+});
