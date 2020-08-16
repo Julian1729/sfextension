@@ -1,11 +1,15 @@
 const wpLiveBtn = document.getElementById("wp-live-login-button");
 const wpDevBtn = document.getElementById("wp-dev-login-button");
+const ftpLiveBtn = document.getElementById("ftp-live-login-button");
 const accountName = document.getElementById("account-name");
 
 let wpDomain,
   wpDevUrl,
   wpUser,
-  wpPass = null;
+  wpPass,
+  ftpIp,
+  ftpUser,
+  ftpPass = null;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const { code } = request;
@@ -17,6 +21,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       wpDevUrl = request.wpDevUrl;
       wpUser = request.wpUser;
       wpPass = request.wpPass;
+      ftpIp = request.ftpIp;
+      ftpUser = request.ftpUser;
+      ftpPass = request.ftpPass;
+      console.log("ftpIp", ftpIp);
+      console.log("ftpUser", ftpUser);
+      console.log("ftpPass", ftpPass);
       if (wpDomain) {
         wpLiveBtn.removeAttribute("disabled");
       }
@@ -46,5 +56,14 @@ wpDevBtn.addEventListener("click", function() {
     wpDevUrl,
     wpUser,
     wpPass
+  });
+});
+
+ftpLiveBtn.addEventListener("click", function() {
+  chrome.runtime.sendMessage({
+    ftpIp,
+    ftpUser,
+    ftpPass,
+    code: "FTP_LOGIN_LIVE"
   });
 });

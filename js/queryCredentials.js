@@ -8,7 +8,10 @@ const noCredentials = msg => alert(msg || "No credentials found");
 let wpDomain,
   wpDevUrl,
   wpUser,
-  wpPass = null;
+  wpPass,
+  ftpIp,
+  ftpUser,
+  ftpPass = null;
 
 // search for live url
 const wpLiveUrlEl = document.querySelector("#acc12_ileinner a");
@@ -37,17 +40,43 @@ if (wpPassEl) {
   wpPass = wpPassEl.textContent;
 }
 
+const ftpIpEl = document.getElementById("00N50000009rrvI_ileinner");
+if (ftpIpEl) {
+  ftpIp = ftpIpEl.textContent;
+}
+
+const ftpUserEl = document.getElementById("00N50000009rrv3_ileinner");
+if (ftpUserEl) {
+  ftpUser = ftpUserEl.textContent;
+}
+
+const ftpPassEl = document.getElementById("00N50000009rrvS_ileinner");
+if (ftpPassEl) {
+  ftpPass = ftpPassEl.textContent;
+}
+
 // check that all required credentials have a value
 if (wpDomain && wpUser && wpPass) {
   // save to storage
-  chrome.storage.local.set({ wpDomain, wpDevUrl, wpPass, wpUser });
+  chrome.storage.local.set({
+    wpDomain,
+    wpDevUrl,
+    wpPass,
+    wpUser,
+    ftpIp,
+    ftpUser,
+    ftpPass
+  });
   // send credentials
   chrome.runtime.sendMessage({
     code: "QUERY_SUCCESSFUL",
     wpDomain,
     wpDevUrl,
     wpUser,
-    wpPass
+    wpPass,
+    ftpIp,
+    ftpUser,
+    ftpPass
   });
 } else {
   alert("No credentials found.");

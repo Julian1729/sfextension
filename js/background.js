@@ -16,7 +16,6 @@ const isSFAccountPage = async tabId => {
 
 const loadQueryScript = async (tabId, changeInfo, tab) => {
   const isPage = await isSFAccountPage(tabId);
-  console.log(isPage);
   if (!isPage) return;
   if (changeInfo.status === "complete") {
     // inject script
@@ -70,6 +69,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         })
         .catch(e => console.error(e));
       break;
+    case "FTP_LOGIN_LIVE":
+      // TODO: get default ftp client
+      const configFile = chrome.runtime.getURL(
+        "ftp-config-files/cyberduck.duck"
+      );
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (xhttp.readyState == 4 && xhttp.status == 200) {
+          let xmlDoc = xhttp.responseXML; //important to use responseXML here
+          // convert to string
+          let serialize = new XMLSerializer();
+          let xmlText = serialize.serializeToString(xmlDoc.getRootNode());
+          xmlText = xmlText.replace("{{hostname}}", request.ftpIp);
+          xmlText = xmlText.replace("{{username}}", request.ftpUser);
+          xmlText = xmlText.replace("{{password}}", request.ftpPass);
+          // convert back to xml
+          xmlDoc = new DOMParser().parseFromString(xmlText, "text/xml");
+          const blob = new Blob([xmlDoc], { type: "text/xml" });
+          const url = URL.createObjectURL(blob);
+          chrome.downloads.download({
+            url: url,
+            saveAs: false
+          });
+        }
+      };
+      xhttp.open("GET", configFile, true);
+      xhttp.send();
+      break;
     default:
+  }
+});
+
+// chrome.downloads.onDeterminingFilename.addListener(
+//   ({ filename, conflictAction }) => {
+//     filename = ;
+//   }
+// );
+
+chrome.downloads.onDeterminingFilename.addListener(({ filename }) => {
+  filename = filename;
+});
+
+chrome.downloads.onChanged.addListener(downloadDelta => {
+  if (downloadDelta.state && downloadDelta.state.current === "complete") {
+    console.log("opening file");
+    chrome.downloads.open(downloadDelta.id);
+    // FIXME: remove file after opened
+    // chrome.downloads.removeFile(downloadDelta.id, () => {
+    //   // erase file
+    //   chrome.downloads.erase({ id: downloadDelta.id });
+    // });
   }
 });

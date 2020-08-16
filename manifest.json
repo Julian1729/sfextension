@@ -16,5 +16,12 @@
   "browser_action": {
     "default_popup": "./popup.html"
   },
-  "permissions": ["tabs", "http://*/", "https://*/", "storage"]
+  "permissions": [
+    "tabs",
+    "http://*/",
+    "https://*/",
+    "storage",
+    "downloads",
+    "downloads.open"
+  ]
 }
